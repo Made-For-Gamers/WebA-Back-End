@@ -3,11 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AggAPIs", "AggAPIs.csproj", "{74D85873-38C9-4711-AC97-24D509D5C263}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AggAPIs", "AggAPIs.csproj", "{74D85873-38C9-4711-AC97-24D509D5C263}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Middleware", "..\Middleware\Middleware.csproj", "{F2D32249-C417-47B9-8C59-30200B72A8ED}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APIFlowTests", "..\APIFlowTests\APIFlowTests.csproj", "{ED93EA01-A27E-49D8-A856-61F9B98A8600}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Middleware", "..\Middleware\Middleware.csproj", "{F2D32249-C417-47B9-8C59-30200B72A8ED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +21,6 @@ Global
 		{F2D32249-C417-47B9-8C59-30200B72A8ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2D32249-C417-47B9-8C59-30200B72A8ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2D32249-C417-47B9-8C59-30200B72A8ED}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ED93EA01-A27E-49D8-A856-61F9B98A8600}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ED93EA01-A27E-49D8-A856-61F9B98A8600}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ED93EA01-A27E-49D8-A856-61F9B98A8600}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ED93EA01-A27E-49D8-A856-61F9B98A8600}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
