@@ -23,7 +23,7 @@ namespace Middleware
         {
             //TODO: Investigate dynamic lambda expressions
             //TODO: How to generalize the filtering?
-
+            //TODO: skip/take for pagination
             var filteringFunction = delegate (string v)
             {
                 return filters.Any(f => f(v));
