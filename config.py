@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     POSTGRES_HOSTNAME: str
     SECRET: str
     ALGORITHM : str
+    GMAILPASSWORD : str
+    GMAILADDR : str
 
     class Config:
         env_file = './.env'
