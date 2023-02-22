@@ -8,8 +8,8 @@ env_variables:
   POSTGRES_USER: ''
   POSTGRES_DB: ''
   POSTGRES_HOSTNAME: ''
-  secret: "
-  algorithm: "HS256"
+  secret: ""
+  algorithm: ""
   
 service: agg-apis
 instance_class: F2

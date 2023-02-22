@@ -1,19 +1,20 @@
 from fastapi import FastAPI, HTTPException
-from database import Base, engine, Team, User
+from Datalayer.database import Base, engine, Team, User
 from typing import List
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from fastapi.responses import FileResponse
-from auth_handler import signJWT
+from Authentication.auth_handler import signJWT
 from passlib.context import CryptContext
 from fastapi.middleware.cors import CORSMiddleware
+from config import settings
 
 #https://testdriven.io/blog/fastapi-jwt-auth/
 
 # to get a string like this run:
 # openssl rand -hex 32
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
+SECRET_KEY = settings.SECRET
+ALGORITHM = settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
