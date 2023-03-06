@@ -18,7 +18,7 @@ class UsersTable:
     def get_user_by_email(self, email):
         with self.db_manager as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT id, name, email, team_name, is_active FROM Users WHERE is_active = true AND email = %s", (email,))
+                cur.execute("SELECT id, name, email, password_hash, is_active, team_name FROM Users WHERE is_active = true AND email = %s", (email,))
                 user = cur.fetchone()
         if user:
             return Users(*user)

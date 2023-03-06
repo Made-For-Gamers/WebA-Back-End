@@ -1,3 +1,4 @@
+from email.mime.multipart import MIMEMultipart
 import smtplib
 import ssl
 from config import settings
@@ -27,6 +28,42 @@ class EmailServer:
         msg['To'] = formataddr((EmailModel.receiver_name, EmailModel.receiver_email))
         msg['From'] = formataddr((self.sender_name, sender_email))
         msg['Subject'] = EmailModel.subject
+
+        print("Sending the email...")
+        try:
+            # Creating a SMTP session | use 587 with TLS, 465 SSL and 25
+            server = smtplib.SMTP('smtp.gmail.com', 587)
+            # Encrypts the email
+            context = ssl.create_default_context()
+            server.starttls(context=context)
+            # We log in into our Google account
+            server.login(sender_email, password)
+            # Sending email from sender, to receiver with the email body
+            server.sendmail(sender_email, EmailModel.receiver_email, msg.as_string())
+            print('Email sent!')
+        except Exception as e:
+            print(f'Oh no! Something bad happened!n {e}')
+        finally:
+            print('Closing the server...')
+            server.quit()
+ 
+    def send_html_mail(self, EmailModel, html_template_name):
+    
+        # User configuration
+        sender_email = settings.GMAILADDR 
+        password = settings.GMAILPASSWORD   
+         
+        # Configurating user's info
+        msg = MIMEMultipart() 
+        msg['To'] = formataddr((EmailModel.receiver_name, EmailModel.receiver_email))
+        msg['From'] = formataddr((self.sender_name, sender_email))
+        msg['Subject'] = EmailModel.subject
+
+        with open(f"services/email/html_templates/{html_template_name}", "r") as f:
+            email_body = f.read()
+
+        html = MIMEText(email_body, 'html')
+        msg.attach(html)
 
         print("Sending the email...")
         try:
