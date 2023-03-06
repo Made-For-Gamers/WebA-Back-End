@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from base.base_response import Result
 from config import settings
-from services.email.email_server import EmailServer, EmailModel
+from services.email.email_server_service import EmailServer, EmailModel
 import requests
 
 CONTACT_ADDR = settings.CONTACTADDR
@@ -37,7 +37,7 @@ def verify_captcha(recaptchaToken):
 
     return verified   
 
-@router.post('/contact')
+@router.post('/contact', tags=["contact"])
 def contact(contact: ContactSchema):
 
     verified = verify_captcha(contact.recaptchaToken)

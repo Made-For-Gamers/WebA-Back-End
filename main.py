@@ -1,16 +1,15 @@
-from fastapi import FastAPI
-from datalayer.database import Base, engine
-from services.email.email_server import EmailServer, EmailModel
+from fastapi import FastAPI 
+from services.email.email_server_service import EmailServer, EmailModel
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import users, gamejam, contact
+from routers import contact_router, gamejam_router, user_router
 
  
 app = FastAPI()
 
-app.include_router(gamejam.router)
-app.include_router(users.router)
-app.include_router(contact.router)
+app.include_router(gamejam_router.router)
+app.include_router(user_router.router)
+app.include_router(contact_router.router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -36,9 +35,9 @@ def index():
     email_body = '''
     Hello JP. This is a test Email Body. Html enabled Body To follow
 '''
-    email_model = EmailModel(receiver_name, receiver_email, email_body, "You Shall Pass! Welcome to the 2023 Game Jam!", "Demo Msg")
+    #email_model = EmailModel(receiver_name, receiver_email, email_body, "You Shall Pass! Welcome to the 2023 Game Jam!", "Demo Msg")
     
-    emailer.send_mail(email_model)
+    #emailer.send_mail(email_model)
     return {":":")"}
  
 
