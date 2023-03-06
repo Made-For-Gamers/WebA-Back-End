@@ -3,13 +3,14 @@ from datalayer.database import Base, engine
 from services.email.email_server import EmailServer, EmailModel
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import users, gamejam
+from routers import users, gamejam, contact
 
  
 app = FastAPI()
 
 app.include_router(gamejam.router)
 app.include_router(users.router)
+app.include_router(contact.router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,7 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 # Create the database
-Base.metadata.create_all(engine)
+# Base.metadata.create_all(engine)
 
  
 @app.get('/')

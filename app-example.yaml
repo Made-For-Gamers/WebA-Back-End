@@ -10,6 +10,10 @@ env_variables:
   POSTGRES_HOSTNAME: ''
   secret: ""
   algorithm: ""
+  GMAILPASSWORD : ""
+  GMAILADDR : ""
+  CONTACTADDR : ""
+  RECAPTCHASECRET: ""
   
 service: agg-apis
 instance_class: F2

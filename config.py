@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     ALGORITHM : str
     GMAILPASSWORD : str
     GMAILADDR : str
+    CONTACTADDR : str
+    RECAPTCHASECRET: str
 
     class Config:
         env_file = './.env'

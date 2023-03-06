@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, String, ForeignKey
+from sqlalchemy import create_engine, Column, Boolean, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from config import settings
@@ -14,17 +14,19 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
-class Team(Base):
+class Team(Base): 
     __tablename__ = 'Teams'
-    Name = Column(String(256),primary_key=True)
-    Members: Mapped[List["User"]] = relationship(back_populates="Team")
+    name : Mapped[str] = mapped_column(String(256),primary_key=True)
+    members: Mapped[List["User"]] = relationship(back_populates="Team")
 
 class User(Base):
     __tablename__ = 'Users'
-    Name = Column(String, nullable=False)
-    Email = Column(String, primary_key=True)
-    PasswordHash = Column(String, nullable=False)
-    Team = relationship("Team", back_populates="Members")
-    Team_Name : Mapped[String] = mapped_column(ForeignKey("Teams.Name"),nullable=True)
+    id: Mapped[int] 
+    name: Mapped[str] = mapped_column(String(256))
+    email : Mapped[str] = mapped_column(primary_key=True)
+    password_hash : Mapped[str] = mapped_column(String(256))
+    is_active : Mapped[bool]
+    team: Mapped["Team"] = relationship("Team", back_populates="members")
+    team_Name : Mapped[String] = mapped_column(ForeignKey("Teams.name"),nullable=True)
 
 
