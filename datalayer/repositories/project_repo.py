@@ -1,38 +1,52 @@
-
 from datalayer.database_manager import DatabaseManager
 
 
 class Project:
-    def __init__(self, name):
+    def __init__(self, name, owner_email, project_type, is_active):
         self.name = name
-         
-class TeamsTable:
+        self.owner_email = owner_email
+        self.project_type = project_type
+        self.is_active = is_active
+
+
+class ProjectsTable:
     def __init__(self, db_manager):
       self.db_manager = db_manager
 
-    def get_team_by_name(self, team_name):
+    def get_projects_by_owner_email(self, email):
         with self.db_manager as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT * FROM teams WHERE is_active = True AND name = %s", (team_name,))
-                team = cur.fetchone()
-        if team:
-            return team
+                cur.execute(
+                    "SELECT * FROM projects WHERE is_active = True AND owner_email = %s", (email,))
+                projects = cur.fetchall()
+        if projects:
+            return projects
         else:
             return None
-  
-    def register_team(self, team_name):
-        res = False
+
+    def create_project(self, project):
         with self.db_manager as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT * FROM teams WHERE name = %s", (team_name,))
-                row = cur.fetchone()
-                if row is None:
-                    cur.execute("INSERT INTO teams (name, is_active) VALUES (%s, %s)",
-                                    (team_name, True))
-                    res = True
-                else:
-                    res = False 
-        return res
+                cur.execute("INSERT INTO projects (name, project_types, is_active, owner_email) VALUES (%s, %s, %s, %s)",
+                                (project.name, project.project_types, True, project.owner_email))
+                cur.execute(
+                    "SELECT * FROM projects WHERE is_active = True AND owner_email = %s", (project.owner_email,))
+                projects = cur.fetchall()
+        if projects:
+            return projects
+        else:
+            return None
+
+    def update_project_by_id(self, project):
+        with self.db_manager as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE projects SET name = %s, project_types = %s, is_active = %s WHERE id = %s",
+                            (project.name, project.project_types, project.is_active))
+                projects = cur.fetchone()
+        if projects:
+            return projects
+        else:
+            return None
  
 db_manager = DatabaseManager()
-user_table = TeamsTable(db_manager)
+user_table = ProjectsTable(db_manager)

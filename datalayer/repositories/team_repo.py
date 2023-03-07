@@ -1,6 +1,4 @@
-
 from datalayer.database_manager import DatabaseManager
-
 
 class Teams:
     def __init__(self, name):

@@ -10,8 +10,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from config import settings
 from datalayer.repositories.user_repo import Users, UsersTable, db_manager
-
-
+ 
 # https://testdriven.io/blog/fastapi-jwt-auth/
 # to get a string like this run:
 # openssl rand -hex 32
@@ -155,7 +154,3 @@ async def signup(user: UserLoginSchema):
 async def read_user(current_user: UserLoggedIn= Depends(get_current_active_user)):
     current_user.password_hash = 'PROTECTED'
     return current_user
-
-# @router.get("/users/me/", response_model=Users)
-# async def read_users_me(current_user: Users = Depends(get_current_active_user)):
-#    return current_user
