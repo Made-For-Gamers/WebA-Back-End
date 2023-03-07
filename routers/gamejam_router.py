@@ -68,6 +68,6 @@ async def add_new_team(data: RegisterTeam):
         for new_user in data.members:
             user = Users(id=None, is_active=True, name=new_user.name, email=new_user.email, password_hash="", team_name=data.team_name)
             user_table.add_update_user(user)
-            send_game_jam_welcome_mail(user.email)
+            send_game_jam_welcome_mail(new_user.name, new_user.email)
     
     return Result(result=True, message="Created the team successfully")

@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from datalayer.database_manager import DatabaseManager
 
 
@@ -8,7 +9,16 @@ class Project:
         self.project_type = project_type
         self.is_active = is_active
 
+class ProjectModel(BaseModel):
+    id : int
+    name: str | None = None 
+    owner_email: str | None = None 
+    project_types: str | None = None 
+    is_active: str | None = None 
 
+class ProjectDict(BaseModel):
+    values: dict[str, ProjectModel]
+ 
 class ProjectsTable:
     def __init__(self, db_manager):
       self.db_manager = db_manager
@@ -18,11 +28,18 @@ class ProjectsTable:
             with conn.cursor() as cur:
                 cur.execute(
                     "SELECT * FROM projects WHERE is_active = True AND owner_email = %s", (email,))
-                projects = cur.fetchall()
-        if projects:
-            return projects
-        else:
-            return None
+                rows = cur.fetchall()
+                projects = []
+                for row in rows:  
+                    project_dict = {
+                        "id" : row[0],
+                        "name": row[1],
+                        "owner_email": row[2],
+                        "project_types": row[3],
+                        "is_active": row[4],
+                    }  
+                    projects.append(project_dict)
+                    return projects
 
     def create_project(self, project):
         with self.db_manager as conn:

@@ -37,8 +37,7 @@ class TokenData(BaseModel):
 class UserLoginSchema(BaseModel):
     email: str
     password: str
-    name: str | None = None
-    team_name: str | None = None
+    name: str | None = None 
 
 class UserLoggedIn(BaseModel):
     email: str 

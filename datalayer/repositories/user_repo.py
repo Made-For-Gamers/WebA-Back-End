@@ -31,6 +31,7 @@ class UsersTable:
          with conn.cursor() as cur:
             cur.execute("SELECT * FROM users WHERE is_active = true AND email = %s", (user.email,))
             row = cur.fetchone()
+            
             if row is None:
                 cur.execute("INSERT INTO users (email, name, password_hash, is_active, team_name) VALUES (%s, %s, %s, %s, %s)",
                                (user.email, user.name, user.password_hash, True, user.team_name))

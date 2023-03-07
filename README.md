@@ -10,3 +10,7 @@ uvicorn main:app
 
 To deploy to gcloud:
 gcloud app deploy
+
+Useful commands:
+
+Update requirements: pur -r requirements.txt

@@ -13,11 +13,18 @@ class ProjectTypesTable:
             with conn.cursor() as cur:
                 cur.execute(
                     "SELECT * FROM project_types")
-                project_types = cur.fetchall()
-        if project_types:
-            return project_types
-        else:
-            return None
+                rows = cur.fetchall()
+                project_types = []
+                for row in rows:
+                    project_dict = {
+                        "id" : row[0],
+                        "name" : row[1]
+                    }
+                    project_types.append(project_dict) 
+            if project_types:
+                return project_types
+            else:
+                return None
   
 db_manager = DatabaseManager()
 user_table = ProjectTypesTable(db_manager)
