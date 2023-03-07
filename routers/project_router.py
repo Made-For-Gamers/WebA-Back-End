@@ -51,7 +51,7 @@ async def read_user(current_user: UserLoggedIn= Depends(get_current_active_user)
     with db_manager as db:
         project_table = ProjectsTable(db) 
         project_dict = project_table.get_projects_by_owner_email(current_user.email) 
-    return ResultList(result=True, body=project_dict)
+    return ResultList(result=True, message="Projects Retrieved", body=project_dict)
 
 @router.post("/project/create", tags=["project"])
 async def create_project(project: ProjectModel, current_user: UserLoggedIn= Depends(get_current_active_user)):
@@ -67,5 +67,5 @@ async def get_project_types(current_user: UserLoggedIn= Depends(get_current_acti
     with db_manager as db:
          project_types_table = ProjectTypesTable(db)
          project_types_list = project_types_table.get_projects_types()
-    return ResultList(result=True, body=project_types_list)
+    return ResultList(result=True, message="Project Types Retrieved", body=project_types_list)
   

@@ -6,4 +6,5 @@ class Result(BaseModel):
 
 class ResultList(BaseModel):
     result:str
+    message: str
     body: object

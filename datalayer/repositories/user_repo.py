@@ -10,7 +10,7 @@ class Users:
         self.password_hash = password_hash
         self.is_active = is_active
         self.team_name = team_name
-         
+ 
 class UsersTable:
     def __init__(self, db_manager):
       self.db_manager = db_manager
@@ -31,7 +31,7 @@ class UsersTable:
          with conn.cursor() as cur:
             cur.execute("SELECT * FROM users WHERE is_active = true AND email = %s", (user.email,))
             row = cur.fetchone()
-            
+
             if row is None:
                 cur.execute("INSERT INTO users (email, name, password_hash, is_active, team_name) VALUES (%s, %s, %s, %s, %s)",
                                (user.email, user.name, user.password_hash, True, user.team_name))
@@ -40,6 +40,20 @@ class UsersTable:
                 cur.execute("UPDATE users SET email = %s, name = %s, is_active = %s, team_name = %s WHERE email = %s",
                                (user.email, user.name, user.is_active, user.team_name))
                 res = False
+        return res
+    
+    def update_user_password(self, email, password):
+        res = False
+        with self.db_manager as conn:
+         with conn.cursor() as cur:
+            cur.execute("SELECT * FROM users WHERE is_active = true AND email = %s", (email,))
+            row = cur.fetchone() 
+            if row is None: 
+                res = False
+            else:
+                cur.execute("UPDATE users SET password_hash = %s WHERE email = %s",
+                               (password))
+                res = True
         return res
  
 db_manager = DatabaseManager()

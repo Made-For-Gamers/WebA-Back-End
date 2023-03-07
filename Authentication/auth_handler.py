@@ -1,10 +1,10 @@
 import time
 from typing import Dict
-
+from passlib.context import CryptContext
 import jwt
 from decouple import config
 
-
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 JWT_SECRET = config("secret")
 JWT_ALGORITHM = config("algorithm")
 
@@ -29,3 +29,6 @@ def decodeJWT(token: str) -> dict:
         return decoded_token if decoded_token["expires"] >= time.time() else None
     except:
         return {}
+
+def generate_reset_token():
+    return jwt.encode({"reset": True}, JWT_SECRET, algorithm=JWT_ALGORITHM)
