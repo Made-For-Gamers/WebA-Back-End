@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     GMAILADDR : str
     CONTACTADDR : str
     RECAPTCHASECRET: str
+    GCPPROJID: str
 
     class Config:
         env_file = './.env'

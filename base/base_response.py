@@ -1,10 +1,10 @@
 from pydantic import BaseModel
 
 class Result(BaseModel):
-    result:str
+    result:bool
     message:str
 
 class ResultList(BaseModel):
-    result:str
+    result:bool
     message: str
     body: object

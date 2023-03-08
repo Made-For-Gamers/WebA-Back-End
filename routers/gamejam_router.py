@@ -7,6 +7,7 @@ from datalayer.repositories.user_repo import Users, UsersTable, db_manager
 from email_validator import validate_email, EmailNotValidError
 
 from services.email.email_server_service import EmailModel, EmailServer
+from services.racaptcha.recaptcha_gcp_service import RecaptchaGCPEnterprise
 
 router = APIRouter()
 
@@ -21,6 +22,7 @@ class TeamMember(BaseModel):
     email: str
 
 class RegisterTeam(BaseModel):
+    recaptcha_token: str
     team_name: str
     members: List[TeamMember]
 
@@ -40,6 +42,12 @@ def send_game_jam_welcome_mail(name, email):
 
 @router.post("/new_team", tags=["gamejam"])
 async def add_new_team(data: RegisterTeam): 
+
+    verified = RecaptchaGCPEnterprise(data.recaptcha_token, "gamejam_registration")
+  
+    if(verified == False):
+         return Result(result=False,message="Captcha verification failed")
+
     with db_manager as db:
         
         user_table = UsersTable(db)

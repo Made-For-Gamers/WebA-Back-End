@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from email_validator import validate_email, EmailNotValidError
 from typing import List 
-from base.base_response import Result
+from base.base_response import Result, ResultList
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from config import settings
@@ -69,7 +69,7 @@ def update_user_password(email, password):
         return user_table.update_user_password(email=email, password=password)
 
 def send_password_reset_email(email: str, token: str):
-    sender_name = "noreply@mfg"
+    sender_name = "noreply@mfg.gg"
     emailer = EmailServer(sender_name)
     reset_url = f"http://localhost:8000/reset-password?token={token}"
     receiver_name = ""
@@ -160,7 +160,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"result": True, "access_token": access_token, "token_type": "bearer"}
 
 @router.post('/forgot-password')
 async def forgot_password(email: str):
@@ -217,4 +217,4 @@ async def signup(user: UserLoginSchema):
 @router.get("/users/me", tags=["users"])
 async def read_user(current_user: UserLoggedIn= Depends(get_current_active_user)):
     current_user.password_hash = 'PROTECTED'
-    return current_user
+    return ResultList(result=True, message="User Retrieved", body=current_user) 
