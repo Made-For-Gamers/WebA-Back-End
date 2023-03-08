@@ -1,18 +1,18 @@
 from datalayer.database_manager import DatabaseManager
 
-class ProjectType:
+class FeatureCategory:
     def __init__(self, name):
         self.name = name 
  
-class ProjectTypesTable:
+class FeatureCategoriesTable:
     def __init__(self, db_manager):
       self.db_manager = db_manager
 
-    def get_projects_types(self):
+    def get_feature_categories(self):
         with self.db_manager as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "SELECT * FROM project_types WHERE is_active = true")
+                    "SELECT * FROM feature_categories WHERE is_active = true")
                 rows = cur.fetchall()
                 project_types = []
                 for row in rows:
@@ -27,4 +27,4 @@ class ProjectTypesTable:
                 return None
   
 db_manager = DatabaseManager()
-user_table = ProjectTypesTable(db_manager)
+user_table = FeatureCategoriesTable(db_manager)

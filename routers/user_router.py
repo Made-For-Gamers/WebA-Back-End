@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from email_validator import validate_email, EmailNotValidError
-from typing import List 
+from typing import Dict, List 
 from base.base_response import Result, ResultList
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -35,10 +35,14 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     email: str | None = None
  
-class UserLoginSchema(BaseModel):
+class UserPartialSchema(BaseModel):
     email: str
     password: str
     name: str | None = None 
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
 
 class UserLoggedIn(BaseModel):
     email: str 
@@ -144,6 +148,7 @@ async def get_current_active_user(current_user: Users = Depends(get_current_user
     if current_user.is_active == False:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
  
 @router.post('/token', response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -155,8 +160,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
@@ -193,7 +197,7 @@ async def reset_password(token: str, new_password: str):
 
  
 @router.post('/signup', tags=["users"])
-async def signup(user: UserLoginSchema):
+async def signup(user: UserPartialSchema):
     with db_manager as db:
         resMsg = "" 
         try:

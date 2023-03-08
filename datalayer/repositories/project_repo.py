@@ -58,7 +58,9 @@ class ProjectsTable:
         with self.db_manager as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE projects SET name = %s, project_types = %s, is_active = %s WHERE id = %s",
-                            (project.name, project.project_types, project.is_active))
+                            (project.name, project.project_types, project.is_active, project.id))
+                cur.execute(
+                    "SELECT * FROM projects WHERE id = %s", (project.id,))
                 projects = cur.fetchone()
         if projects:
             return projects
