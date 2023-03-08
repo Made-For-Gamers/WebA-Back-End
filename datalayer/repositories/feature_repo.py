@@ -3,7 +3,7 @@ from datalayer.database_manager import DatabaseManager
 from typing import List
 
 class FeatureModel(BaseModel):
-    id : int 
+    id : int | None = None 
     name: str | None = None 
     description: str | None = None 
     feature_image_url: str | None = None 
