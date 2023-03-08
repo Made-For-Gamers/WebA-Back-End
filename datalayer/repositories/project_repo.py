@@ -14,7 +14,7 @@ class ProjectModel(BaseModel):
     name: str | None = None 
     owner_email: str | None = None 
     project_types: str | None = None 
-    is_active: str | None = None 
+    is_active: bool | None = None 
 
 class ProjectDict(BaseModel):
     values: dict[str, ProjectModel]
