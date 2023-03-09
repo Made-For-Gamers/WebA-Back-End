@@ -52,7 +52,7 @@ class UsersTable:
                 res = False
             else:
                 cur.execute("UPDATE users SET password_hash = %s WHERE email = %s",
-                               (password))
+                               (password, email))
                 res = True
         return res
  

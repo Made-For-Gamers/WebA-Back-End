@@ -175,19 +175,22 @@ async def forgot_password(email: str):
 async def reset_password(token: str, new_password: str):
     try:
         token_data = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
-        email = token_data["sub"]
+        email = token_data["sub"] 
         expires_at = datetime.utcfromtimestamp(token_data["exp"])
-
+ 
         with db_manager as db:
             pwr_table = PasswordResetTable(db)
             reset_token = pwr_table.get_password_reset_token_by_user_id(email=email) 
+            print(reset_token.token)
             if reset_token is None:
                 return Result(result=False, message="Password reset token not found") 
             if reset_token.token != token:
                 return Result(result=False, message="Invalid password reset token")  
             if datetime.utcnow() > expires_at:
                 return Result(result=False, message="Password reset token has expired") 
+            new_password = get_password_hash(new_password)
             update_user_password(email, new_password)
+            print(reset_token.id)
             delete_password_reset_token(reset_token.id)
         return {"message": "Password reset successfully"}
     except jwt.ExpiredSignatureError:
