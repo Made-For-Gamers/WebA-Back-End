@@ -34,9 +34,9 @@ class ProjectsTable:
                     project_dict = {
                         "id" : row[0],
                         "name": row[1],
-                        "owner_email": row[2],
-                        "project_types": row[3],
-                        "is_active": row[4],
+                        "project_types": row[2],
+                        "is_active": row[3],
+                        "owner_email": row[4], 
                     }  
                     projects.append(project_dict)
                     return projects

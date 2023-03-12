@@ -192,7 +192,7 @@ async def reset_password(token: str, new_password: str):
             update_user_password(email, new_password)
             print(reset_token.id)
             delete_password_reset_token(reset_token.id)
-        return {"message": "Password reset successfully"}
+        return Result(result=True, message="Password reset successfully")
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password reset token has expired")
     except jwt.InvalidTokenError:

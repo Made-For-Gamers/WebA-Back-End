@@ -12,7 +12,7 @@ class ProjectTypesTable:
         with self.db_manager as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "SELECT * FROM project_types WHERE is_active = true")
+                    "SELECT * FROM project_types")
                 rows = cur.fetchall()
                 project_types = []
                 for row in rows:
