@@ -39,7 +39,7 @@ class ProjectsTable:
                         "owner_email": row[4], 
                     }  
                     projects.append(project_dict)
-                    return projects
+                return projects
 
     def create_project(self, project):
         with self.db_manager as conn:

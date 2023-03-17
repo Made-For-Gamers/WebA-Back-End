@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from typing import List
-from base.base_response import Result, ResultList  
+from base.base_response import Result, ResultList
 from datalayer.repositories.project_repo import ProjectsTable
 from datalayer.repositories.project_type_repo import ProjectTypesTable
 from datalayer.repositories.user_repo import Users, UsersTable, db_manager

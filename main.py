@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from services.email.email_server_service import EmailServer, EmailModel
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import contact_router, gamejam_router, user_router, project_router, feature_router
+from routers import contact_router, gamejam_router, user_router, project_router, feature_router, project_features_router
 
  
 app = FastAPI(title="Made For Gamers Aggregator API")
@@ -12,6 +12,7 @@ app.include_router(user_router.router)
 app.include_router(contact_router.router)
 app.include_router(project_router.router)
 app.include_router(feature_router.router)
+app.include_router(project_features_router.router)
 
 app.add_middleware(
     CORSMiddleware,

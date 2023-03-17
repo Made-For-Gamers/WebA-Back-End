@@ -29,7 +29,7 @@ class FeatureTable:
         with self.db_manager as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "SELECT * FROM feature WHERE is_active = True AND project_id = %s", (id,))
+                    "SELECT * FROM features WHERE is_active = True AND project_id = %s", (id,))
                 rows = cur.fetchall()
                 features = []
                 for row in rows:
@@ -58,7 +58,7 @@ class FeatureTable:
                 cur.execute("INSERT INTO features (name, description, feature_image_url, supported_engines, documentation_url, web_url, git_url, feature_type, api_key, is_active, is_live, is_verified, project_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                                 (feature.name, feature.description, feature.feature_image_url, feature.supported_engines, feature.documentation_url, feature.web_url, feature.git_url, feature.feature_type, feature.api_key, feature.is_active, feature.is_live, feature.is_verified, feature.project_id))
                 cur.execute(
-                    "SELECT * FROM features WHERE is_active = True AND project_id = %s AND name = %s", (feature.name,))
+                    "SELECT * FROM features WHERE is_active = True AND project_id = %s AND name = %s", (feature.project_id, feature.name,))
                 res = cur.fetchone()
         if res:
             return res
