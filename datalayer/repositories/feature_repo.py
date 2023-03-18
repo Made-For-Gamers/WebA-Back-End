@@ -3,7 +3,6 @@ from datalayer.database_manager import DatabaseManager
 from typing import List
 
 class FeatureModel(BaseModel):
-    id : int | None = None 
     name: str | None = None 
     description: str | None = None 
     feature_image_url: str | None = None 
@@ -12,7 +11,7 @@ class FeatureModel(BaseModel):
     web_url: str | None = None 
     git_url: str | None = None 
     feature_type: list[str]  | None = None 
-    api_key: bool | None = None 
+    api_key: str | None = None 
     is_active: bool | None = None 
     is_live: bool | None = None  
     is_verified: bool | None = None 
