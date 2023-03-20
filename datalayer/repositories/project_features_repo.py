@@ -1,21 +1,29 @@
 from pydantic import BaseModel
 from datalayer.database_manager import DatabaseManager
 
+
+class ProjectFeatureModel(BaseModel):
+    id : int | None = None 
+    project_id: int | None = None 
+    feature_id: int | None = None 
+    is_active: bool | None = None 
+
+class FeatureDict(BaseModel):
+    values: dict[str, ProjectFeatureModel]
 class ProjectFeatureTable:
     def __init__(self, db_manager):
       self.db_manager = db_manager
-
-class ProjectFeatureModel(BaseModel):
-    id : int
-    project_id: int
-    feature_id: int
-    is_active: bool
 
     def get_project_feature(self, project_id):
         with self.db_manager as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "SELECT * FROM project_features WHERE is_active = true AND project_id = %s", (project_id,))
+                    "SELECT" +
+                    "  project_features.id, project_features.project_id, project_features.feature_id , project_features.is_active, " +
+                    "  features.name, features.description, features.feature_image_url, features.supported_engines, features.documentation_url, features.web_url, features.git_url, features.feature_type, features.api_key, features.is_live, features.is_verified " +
+                    "FROM project_features " +
+                    "  LEFT JOIN features ON feature_id = features.id " +
+                    "WHERE project_features.is_active = true AND project_features.project_id = %s", (project_id,))
                 rows = cur.fetchall()
                 project_types = []
                 for row in rows:
@@ -23,13 +31,25 @@ class ProjectFeatureModel(BaseModel):
                         "id" : row[0],
                         "project_id" : row[1],
                         "feature_id" : row[2],
-                        "is_active" : row[3]
+                        "is_active" : row[3],
+
+                        "name" : row[4],
+                        "description" : row[5],
+                        "feature_image_url" : row[6],
+                        "supported_engines" : row[7],
+                        "documentation_url" : row[8],
+                        "web_url" : row[9],
+                        "git_url" : row[10],
+                        "feature_type" : row[11],
+                        "api_key" : row[12],
+                        "is_live" : row[13],
+                        "is_verified" : row[14],
                     }
                     project_types.append(project_dict) 
-            if project_types:
-                return project_types
-            else:
-                return None
+                if project_types:
+                    return project_types
+                else:
+                    return None
 
     def create_project_feature(self, project):
       with self.db_manager as conn:
