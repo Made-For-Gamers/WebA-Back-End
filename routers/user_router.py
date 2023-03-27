@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from email_validator import validate_email, EmailNotValidError
-from typing import Dict, List 
+from typing import Dict, List, Optional
 from base.base_response import Result, ResultList
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -11,7 +11,10 @@ from config import settings
 from datalayer.repositories.password_reset_repo import PasswordResetTable
 from datalayer.repositories.user_repo import Users, UsersTable, db_manager
 from services.email.email_server_service import EmailModel, EmailServer
- 
+from eth_account.messages import defunct_hash_message, recover_message, encode_defunct
+from near_api import PublicKey
+import ed25519
+
 # https://testdriven.io/blog/fastapi-jwt-auth/
 # to get a string like this run:
 # openssl rand -hex 32
@@ -123,6 +126,39 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+def near_authenticate_user(wallet: str, signature:str, meesage:str) -> Optional[str]:
+    message_bytes = meesage.encode('utf-8')
+    signature_bytes = bytes.fromhex(signature)
+    public_key_bytes = bytes.fromhex(wallet)
+ 
+    try:
+        ed25519.VerifyingKey(public_key_bytes).verify(signature_bytes, message_bytes)
+        validate_signature = True
+    except ed25519.BadSignatureError:
+        validate_signature = False
+
+    if validate_signature:
+        with db_manager as db:
+            user_table = UsersTable(db)
+            user = user_table.get_or_create_user_w3(wallet) 
+        if not user:
+            return None
+        return user
+    else:
+        return None
+    
+def metamask_auth(wallet:str, signature:str, message:str) -> Optional[str]: 
+    address = recover_message(encode_defunct(text=message), signature=signature) 
+    if address == wallet:
+        with db_manager as db:
+            user_table = UsersTable(db)
+            user = user_table.get_or_create_user_w3(wallet) 
+        if not user:
+            return None
+        return user
+    else:
+        return None
  
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
@@ -148,7 +184,6 @@ async def get_current_active_user(current_user: Users = Depends(get_current_user
     if current_user.is_active == False:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
-
  
 @router.post('/token', response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -165,6 +200,23 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         data={"sub": user.email}, expires_delta=access_token_expires
     )
     return {"result": True, "access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/auth/w3wallet")
+async def wallet_auth(wallet: str, signature: str, message: str):
+
+    if(wallet.startswith("0x")):
+        user_id = metamask_auth(wallet, signature, message)
+    else:
+        user_id = near_authenticate_user(wallet, signature, message)
+ 
+    if user_id:
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+        data={"sub": wallet}, expires_delta=access_token_expires)
+        return {"result": True, "access_token": access_token, "token_type": "bearer"}
+    else:
+        return Result(result=False, message="Wallet Authentication Failed")
 
 @router.post('/forgot-password')
 async def forgot_password(email: str):

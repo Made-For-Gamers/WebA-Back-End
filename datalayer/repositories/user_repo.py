@@ -3,13 +3,14 @@ from datalayer.database_manager import DatabaseManager
 
 
 class Users:
-    def __init__(self, id, name, email, password_hash, is_active, team_name=None):
+    def __init__(self, id, name, email, password_hash, is_active, team_name=None, wallet_addr=None):
         self.id = id
         self.name = name
         self.email = email
         self.password_hash = password_hash
         self.is_active = is_active
         self.team_name = team_name
+        self.wallet_addr = wallet_addr
  
 class UsersTable:
     def __init__(self, db_manager):
@@ -24,7 +25,27 @@ class UsersTable:
             return Users(*user)
         else:
             return None
+        
+    def get_or_create_user_w3(self, user): 
+        with self.db_manager as conn:
+         with conn.cursor() as cur:
+            cur.execute("SELECT * FROM users WHERE is_active = true AND wallet_addr = %s", (user.wallet_addr,))
+            row = cur.fetchone()
 
+            if row is None:  
+                if(user.name is None):
+                    user.name = "Anonymous"
+                if(user.email is None):
+                    user.email = "Anonymous@" + user.wallet_addr + ".com"
+
+                cur.execute("INSERT INTO users (email, name, password_hash, is_active, team_name, wallet_addr) VALUES (%s, %s, %s, %s, %s, %s)",
+                                 (user.email, user.name, user.password_hash, True, user.team_name, user.wallet_addr))
+                newUser = cur.fetchone()
+                if newUser:
+                    return Users(*newUser)
+            else:
+                return None
+         
     def add_update_user(self, user):
         res = False
         with self.db_manager as conn:
