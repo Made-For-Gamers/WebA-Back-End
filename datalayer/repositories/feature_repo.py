@@ -3,6 +3,7 @@ from datalayer.database_manager import DatabaseManager
 from typing import List
 
 class FeatureModel(BaseModel):
+    id: int | None = None 
     name: str | None = None 
     description: str | None = None 
     feature_image_url: str | None = None 
@@ -49,7 +50,34 @@ class FeatureTable:
                         project_id=row[13]
                     )
                     features.append(feature.dict()) 
-                    return features
+                return features
+
+    def get_all_features(self):
+        with self.db_manager as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT * FROM features WHERE is_active = true AND is_live = true AND is_verified = true")
+                rows = cur.fetchall()
+                features = []
+                for row in rows:
+                    feature = FeatureModel(
+                        id=row[0],
+                        name=row[1],
+                        description=row[2],
+                        feature_image_url=row[3],
+                        supported_engines=row[4],
+                        documentation_url=row[5],
+                        web_url=row[6],
+                        git_url=row[7],
+                        feature_type=row[8],
+                        api_key=row[9],
+                        is_active=row[10],
+                        is_live=row[11],
+                        is_verified=row[12],
+                        project_id=row[13]
+                    )
+                    features.append(feature.dict()) 
+                return features
 
     def create_feature(self, feature):
         with self.db_manager as conn:

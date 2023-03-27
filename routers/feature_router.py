@@ -27,6 +27,12 @@ def get_features_for_project(project_id):
         features = feature_table.get_feature_by_project_id(project_id)
     return features
 
+def get_all_features():
+    with db_manager as db:
+        feature_table = FeatureTable(db)
+        features = feature_table.get_all_features()
+    return features
+
 def create_feature_func(feature):
     with db_manager as db:
         feature_table = FeatureTable(db)
@@ -39,9 +45,14 @@ def update_feature_func(feature):
         features = feature_table.update_project_by_id(feature)
     return features
 
-@router.get("/all", tags=["feature"], summary="Gets all features for selected project")
+@router.get("/me", tags=["feature"], summary="Gets all features for selected project")
 async def read_user(project_id: str, current_user: UserLoggedIn= Depends(get_current_active_user)): 
         res = get_features_for_project(project_id)
+        return ResultList(result=True, message="Features Retrieved", body=res)
+
+@router.get("/all", tags=["feature"], summary="Gets all live and verified features - for game projects to link to")
+async def read_user(current_user: UserLoggedIn= Depends(get_current_active_user)): 
+        res = get_all_features()
         return ResultList(result=True, message="Features Retrieved", body=res)
 
 @router.get("/categories", tags=["feature"], summary="Gets all features categories")
@@ -61,6 +72,6 @@ async def create_feature(feature: FeatureModel, current_user: UserLoggedIn= Depe
 async def update_feature(feature: FeatureModel, current_user: UserLoggedIn= Depends(get_current_active_user)):
     res = update_feature_func(feature)
     if res is not None:
-        return Result(result=True, message="Feature created successfully")
+        return Result(result=True, message="Feature updated successfully")
     else: 
         return Result(result=False, message="Feature could not be created")
