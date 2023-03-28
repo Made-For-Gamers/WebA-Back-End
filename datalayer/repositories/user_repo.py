@@ -1,6 +1,6 @@
 
 from datalayer.database_manager import DatabaseManager
-
+import random
 
 class Users:
     def __init__(self, id, name, email, password_hash, is_active, team_name=None, wallet_addr=None):
@@ -26,25 +26,27 @@ class UsersTable:
         else:
             return None
         
-    def get_or_create_user_w3(self, user): 
+    def get_or_create_user_w3(self, wallet_address): 
         with self.db_manager as conn:
          with conn.cursor() as cur:
-            cur.execute("SELECT * FROM users WHERE is_active = true AND wallet_addr = %s", (user.wallet_addr,))
-            row = cur.fetchone()
+            cur.execute("SELECT * FROM users WHERE is_active = true AND wallet_address = %s", (wallet_address,))
+            row = cur.fetchone()  
+            if row is not None:   
+                return Users(*row) 
+            else: 
+                email = "Anonymous@" + wallet_address + ".com"
+                password_hash = random.getrandbits(128)
 
-            if row is None:  
-                if(user.name is None):
-                    user.name = "Anonymous"
-                if(user.email is None):
-                    user.email = "Anonymous@" + user.wallet_addr + ".com"
+                cur.execute("INSERT INTO users (email, name, password_hash, is_active, team_name, wallet_address) VALUES (%s, %s, %s, %s, %s, %s)",
+                                 (email, wallet_address, password_hash, True, None, wallet_address))
+                conn.commit()  # Commit the transaction
 
-                cur.execute("INSERT INTO users (email, name, password_hash, is_active, team_name, wallet_addr) VALUES (%s, %s, %s, %s, %s, %s)",
-                                 (user.email, user.name, user.password_hash, True, user.team_name, user.wallet_addr))
-                newUser = cur.fetchone()
+                cur.execute("SELECT * FROM users WHERE is_active = true AND wallet_address = %s", (wallet_address,))
+                newUser = cur.fetchone() 
                 if newUser:
                     return Users(*newUser)
-            else:
-                return None
+                else:
+                    return None
          
     def add_update_user(self, user):
         res = False

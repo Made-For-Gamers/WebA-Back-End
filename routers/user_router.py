@@ -1,9 +1,9 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from email_validator import validate_email, EmailNotValidError
-from typing import Dict, List, Optional
+from typing import Optional 
 from base.base_response import Result, ResultList
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -11,20 +11,18 @@ from config import settings
 from datalayer.repositories.password_reset_repo import PasswordResetTable
 from datalayer.repositories.user_repo import Users, UsersTable, db_manager
 from services.email.email_server_service import EmailModel, EmailServer
-from eth_account.messages import defunct_hash_message, recover_message, encode_defunct
-from near_api import PublicKey
-import ed25519
-
-# https://testdriven.io/blog/fastapi-jwt-auth/
-# to get a string like this run:
-# openssl rand -hex 32
+from eth_account.messages import encode_defunct
+from eth_account.account import Account
+from email_validator import validate_email, EmailNotValidError 
+import requests
+import json
+   
 SECRET_KEY = settings.SECRET
 ALGORITHM = settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-router = APIRouter()
-
+router = APIRouter() 
 router = APIRouter(
     prefix="/users",
     tags=["users"],
@@ -42,6 +40,11 @@ class UserPartialSchema(BaseModel):
     email: str
     password: str
     name: str | None = None 
+
+class w3WalletSchema(BaseModel):
+    wallet: str
+    signature: str
+    message: str | None = None 
 
 class UserLogin(BaseModel):
     email: str
@@ -99,11 +102,17 @@ def generate_password_reset_token(email: str) ->str:
         pwr_table.create_password_reset_token(user.id, token, token_data["exp"])
         send_password_reset_email(email, token)
   
-def get_user(email: str):
+def get_user(email: str): 
+    try:
+         validation = validate_email(email)
+         email = validation.email
+    except EmailNotValidError as e:
+         # if email is not valid, then it could a wallet address trying to login
+         # apply default wallet email
+         email = "Anonymous@" + email + ".com"
     with db_manager as db:
         user_table = UsersTable(db)
-        user_data = user_table.get_user_by_email(email)
-
+        user_data = user_table.get_user_by_email(email) 
     if (user_data is not None): 
         return user_data
  
@@ -112,6 +121,8 @@ def authenticate_user(email: str, password: str):
         user_table = UsersTable(db)
         user = user_table.get_user_by_email(email) 
     if not user:
+        return False
+    if user.password_hash is None:
         return False
     if not verify_password(password, user.password_hash):
         return False
@@ -127,29 +138,47 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def near_authenticate_user(wallet: str, signature:str, meesage:str) -> Optional[str]:
-    message_bytes = meesage.encode('utf-8')
-    signature_bytes = bytes.fromhex(signature)
-    public_key_bytes = bytes.fromhex(wallet)
- 
-    try:
-        ed25519.VerifyingKey(public_key_bytes).verify(signature_bytes, message_bytes)
-        validate_signature = True
-    except ed25519.BadSignatureError:
-        validate_signature = False
+def near_authenticate_user(account_id: str, public_key: str) -> Optional[str]:
 
-    if validate_signature:
-        with db_manager as db:
-            user_table = UsersTable(db)
-            user = user_table.get_or_create_user_w3(wallet) 
-        if not user:
-            return None
-        return user
-    else:
-        return None
-    
+    # Verify that the provided public key is associated with the given account ID
+    headers = {"Content-Type": "application/json"}
+
+    # Change to "testnet" if you are using the NEAR Testnet
+    network = "mainnet"  
+    near_provider = f"https://rpc.{network}.near.org"
+
+    # Fetch account state
+    payload = json.dumps({
+        "jsonrpc": "2.0",
+        "id": "dontcare",
+        "method": "query",
+        "params": {
+            "request_type": "view_access_key_list",
+            "finality": "final",
+            "account_id": account_id
+        }
+    })
+
+    response = requests.post(near_provider, headers=headers, data=payload)
+    account_state = response.json()
+
+    print(account_state)
+ 
+    if 'result' in account_state and 'keys' in account_state['result']:
+        for key in account_state['result']['keys']:
+            if key['public_key'] == public_key:
+                # The public key is associated with the account, continue with the authentication process 
+                with db_manager as db:
+                    user_table = UsersTable(db)
+                    user = user_table.get_or_create_user_w3(account_id) 
+                if not user:
+                    return None
+                return user
+  
 def metamask_auth(wallet:str, signature:str, message:str) -> Optional[str]: 
-    address = recover_message(encode_defunct(text=message), signature=signature) 
+     # Verify that the provided signature is valid for the given message and wallet address
+    address = Account.recover_message(encode_defunct(text=message), signature=signature)
+
     if address == wallet:
         with db_manager as db:
             user_table = UsersTable(db)
@@ -202,18 +231,22 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     return {"result": True, "access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/auth/w3wallet")
-async def wallet_auth(wallet: str, signature: str, message: str):
+@router.post("/tokenW3wallet")
+async def wallet_auth(wallet: w3WalletSchema):
+    print("Wallet Auth")
+    print(wallet.wallet)
+    print("Wallet signature")
+    print(wallet.signature) 
 
-    if(wallet.startswith("0x")):
-        user_id = metamask_auth(wallet, signature, message)
+    if(wallet.wallet.startswith("0x")):
+        user_id = metamask_auth(wallet.wallet, wallet.signature, wallet.message)
     else:
-        user_id = near_authenticate_user(wallet, signature, message)
+        user_id = near_authenticate_user(wallet.wallet, wallet.signature)
  
     if user_id:
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
-        data={"sub": wallet}, expires_delta=access_token_expires)
+            data={"sub": wallet.wallet}, expires_delta=access_token_expires)
         return {"result": True, "access_token": access_token, "token_type": "bearer"}
     else:
         return Result(result=False, message="Wallet Authentication Failed")
