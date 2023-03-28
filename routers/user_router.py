@@ -232,11 +232,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 @router.post("/tokenW3wallet")
-async def wallet_auth(wallet: w3WalletSchema):
-    print("Wallet Auth")
-    print(wallet.wallet)
-    print("Wallet signature")
-    print(wallet.signature) 
+async def wallet_auth(wallet: w3WalletSchema): 
 
     if(wallet.wallet.startswith("0x")):
         user_id = metamask_auth(wallet.wallet, wallet.signature, wallet.message)
