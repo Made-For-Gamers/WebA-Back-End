@@ -177,10 +177,12 @@ def near_authenticate_user(account_id: str, public_key: str) -> Optional[str]:
   
 def metamask_auth(wallet:str, signature:str, message:str) -> Optional[str]: 
      # Verify that the provided signature is valid for the given message and wallet address
+ 
     address = Account.recover_message(encode_defunct(text=message), signature=signature)
 
-    if address == wallet:
-        with db_manager as db:
+    print(address)
+    if address.lower() == wallet.lower():
+        with db_manager as db: 
             user_table = UsersTable(db)
             user = user_table.get_or_create_user_w3(wallet) 
         if not user:
@@ -234,7 +236,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 @router.post("/tokenW3wallet")
 async def wallet_auth(wallet: w3WalletSchema): 
 
-    if(wallet.wallet.startswith("0x")):
+    if(wallet.wallet.startswith("0x")): 
         user_id = metamask_auth(wallet.wallet, wallet.signature, wallet.message)
     else:
         user_id = near_authenticate_user(wallet.wallet, wallet.signature)

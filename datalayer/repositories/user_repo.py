@@ -28,7 +28,7 @@ class UsersTable:
         
     def get_or_create_user_w3(self, wallet_address): 
         with self.db_manager as conn:
-         with conn.cursor() as cur:
+         with conn.cursor() as cur: 
             cur.execute("SELECT * FROM users WHERE is_active = true AND wallet_address = %s", (wallet_address,))
             row = cur.fetchone()  
             if row is not None:   
