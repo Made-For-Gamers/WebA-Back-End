@@ -3,14 +3,16 @@ from datalayer.database_manager import DatabaseManager
 import random
 
 class Users:
-    def __init__(self, id, name, email, password_hash, is_active, team_name=None, wallet_addr=None):
+    def __init__(self, id, name, email, password_hash, is_active, surname=None, team_name=None, wallet_addr=None, profile_pic=None, extra_arg=None):
         self.id = id
         self.name = name
         self.email = email
-        self.password_hash = password_hash
+        self.password_hash = password_hash 
         self.is_active = is_active
         self.team_name = team_name
-        self.wallet_addr = wallet_addr
+        self.wallet_addr = wallet_addr 
+        self.profile_pic = profile_pic 
+        self.surname = surname
  
 class UsersTable:
     def __init__(self, db_manager):
@@ -19,12 +21,13 @@ class UsersTable:
     def get_user_by_email(self, email):
         with self.db_manager as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT id, name, email, password_hash, is_active, team_name FROM Users WHERE is_active = true AND email = %s", (email,))
+                cur.execute("SELECT id, name, email, password_hash, is_active, surname, team_name, wallet_address, profile_pic FROM users WHERE is_active = true AND email = %s", (email,))
                 user = cur.fetchone()
         if user:
             return Users(*user)
         else:
             return None
+
         
     def get_or_create_user_w3(self, wallet_address): 
         with self.db_manager as conn:
@@ -48,6 +51,20 @@ class UsersTable:
                 else:
                     return None
          
+    def update_profile_pic(self, email, profile_pic):
+        res = False
+        with self.db_manager as conn:
+         with conn.cursor() as cur:
+            cur.execute("SELECT * FROM users WHERE is_active = true AND email = %s", (email,))
+            row = cur.fetchone() 
+            if row is None: 
+                res = False
+            else:
+                cur.execute("UPDATE users SET profile_pic = %s WHERE email = %s",
+                               (profile_pic, email))
+                res = True
+        return res
+
     def add_update_user(self, user):
         res = False
         with self.db_manager as conn:

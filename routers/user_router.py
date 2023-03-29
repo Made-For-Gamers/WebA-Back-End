@@ -12,8 +12,7 @@ from datalayer.repositories.password_reset_repo import PasswordResetTable
 from datalayer.repositories.user_repo import Users, UsersTable, db_manager
 from services.email.email_server_service import EmailModel, EmailServer
 from eth_account.messages import encode_defunct
-from eth_account.account import Account
-from email_validator import validate_email, EmailNotValidError 
+from eth_account.account import Account 
 import requests
 import json
    
@@ -35,6 +34,9 @@ class Token(BaseModel):
  
 class TokenData(BaseModel):
     email: str | None = None
+ 
+class ProfilePicturedata(BaseModel):
+    base64: str | None = None
  
 class UserPartialSchema(BaseModel):
     email: str
@@ -115,6 +117,21 @@ def get_user(email: str):
         user_data = user_table.get_user_by_email(email) 
     if (user_data is not None): 
         return user_data
+    
+def update_user_profile_picture(email: str, profile_picture: str):
+    try:
+        print("email received: ", email)
+        validation = validate_email(email)
+        email = validation.email
+    except EmailNotValidError as e:
+        # if email is not valid, then it could a wallet address trying to login
+        # apply default wallet email
+        email = "Anonymous@" + email + ".com"
+
+    with db_manager as db:
+        user_table = UsersTable(db)
+        res = user_table.update_profile_pic(email, profile_picture)
+        return res    
  
 def authenticate_user(email: str, password: str):
     with db_manager as db:
@@ -161,9 +178,7 @@ def near_authenticate_user(account_id: str, public_key: str) -> Optional[str]:
 
     response = requests.post(near_provider, headers=headers, data=payload)
     account_state = response.json()
-
-    print(account_state)
- 
+  
     if 'result' in account_state and 'keys' in account_state['result']:
         for key in account_state['result']['keys']:
             if key['public_key'] == public_key:
@@ -179,8 +194,7 @@ def metamask_auth(wallet:str, signature:str, message:str) -> Optional[str]:
      # Verify that the provided signature is valid for the given message and wallet address
  
     address = Account.recover_message(encode_defunct(text=message), signature=signature)
-
-    print(address)
+ 
     if address.lower() == wallet.lower():
         with db_manager as db: 
             user_table = UsersTable(db)
@@ -264,7 +278,7 @@ async def reset_password(token: str, new_password: str):
         with db_manager as db:
             pwr_table = PasswordResetTable(db)
             reset_token = pwr_table.get_password_reset_token_by_user_id(email=email) 
-            print(reset_token.token)
+       
             if reset_token is None:
                 return Result(result=False, message="Password reset token not found") 
             if reset_token.token != token:
@@ -273,14 +287,13 @@ async def reset_password(token: str, new_password: str):
                 return Result(result=False, message="Password reset token has expired") 
             new_password = get_password_hash(new_password)
             update_user_password(email, new_password)
-            print(reset_token.id)
+          
             delete_password_reset_token(reset_token.id)
         return Result(result=True, message="Password reset successfully")
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password reset token has expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid password reset token")
-
  
 @router.post('/signup', tags=["users"])
 async def signup(user: UserPartialSchema):
@@ -308,3 +321,8 @@ async def signup(user: UserPartialSchema):
 async def read_user(current_user: UserLoggedIn= Depends(get_current_active_user)):
     current_user.password_hash = 'PROTECTED'
     return ResultList(result=True, message="User Retrieved", body=current_user) 
+
+@router.post("/update/profile-pic", tags=["users"])
+async def update_profile_pic(profile_pic: ProfilePicturedata, current_user: UserLoggedIn= Depends(get_current_active_user)):
+    res = update_user_profile_picture(current_user.email, profile_pic.base64)
+    return Result(result=res, message="Profile Picture Updated")
