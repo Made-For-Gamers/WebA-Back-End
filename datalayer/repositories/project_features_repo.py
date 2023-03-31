@@ -31,8 +31,7 @@ class ProjectFeatureTable:
                         "id" : row[0],
                         "project_id" : row[1],
                         "feature_id" : row[2],
-                        "is_active" : row[3],
-
+                        "is_active" : row[3], 
                         "name" : row[4],
                         "description" : row[5],
                         "feature_image_url" : row[6],
