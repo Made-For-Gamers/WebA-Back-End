@@ -1,7 +1,7 @@
+from typing import Optional
 from pydantic import BaseModel
 from datalayer.database_manager import DatabaseManager
-
-
+ 
 class Project:
     def __init__(self, name, owner_email, project_type, is_active):
         self.name = name
@@ -11,10 +11,10 @@ class Project:
 
 class ProjectModel(BaseModel):
     id : int
-    name: str | None = None 
-    owner_email: str | None = None 
-    project_types: str | None = None 
-    is_active: bool | None = None 
+    name: Optional[str] = None
+    owner_email: Optional[str] = None
+    project_types: Optional[str] = None
+    is_active: Optional[bool] = None 
 
 class ProjectDict(BaseModel):
     values: dict[str, ProjectModel]

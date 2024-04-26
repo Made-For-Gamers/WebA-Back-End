@@ -1,25 +1,26 @@
 from pydantic import BaseModel
 from datalayer.database_manager import DatabaseManager
-from typing import List
+from typing import List, Optional
 
 class FeatureModel(BaseModel):
-    id: int | None = None 
-    name: str | None = None 
-    description: str | None = None 
-    feature_image_url: str | None = None 
-    supported_engines: list[str]  | None = None 
-    documentation_url: str | None = None 
-    web_url: str | None = None 
-    git_url: str | None = None 
-    feature_type: list[str]  | None = None 
-    api_key: str | None = None 
-    is_active: bool | None = None 
-    is_live: bool | None = None  
-    is_verified: bool | None = None 
-    project_id : int
+    id: Optional[int] = None 
+    name: Optional[str] = None
+    description: Optional[str] = None
+    feature_image_url: Optional[str] = None
+    supported_engines: Optional[List[str]] = None  
+    documentation_url: Optional[str] = None
+    web_url: Optional[str] = None
+    git_url: Optional[str] = None
+    feature_type: Optional[List[str]] = None  
+    api_key: Optional[str] = None
+    is_active: Optional[bool] = None 
+    is_live: Optional[bool] = None  
+    is_verified: Optional[bool] = None 
+    project_id: int  
 
 class FeatureDict(BaseModel):
     values: dict[str, FeatureModel]
+
  
 class FeatureTable:
     def __init__(self, db_manager):

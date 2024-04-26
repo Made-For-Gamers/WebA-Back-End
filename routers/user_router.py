@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from email_validator import validate_email, EmailNotValidError
-from typing import Optional 
+from typing import Optional
 from base.base_response import Result, ResultList
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -15,6 +15,7 @@ from eth_account.messages import encode_defunct
 from eth_account.account import Account 
 import requests
 import json
+
    
 SECRET_KEY = settings.SECRET
 ALGORITHM = settings.ALGORITHM
@@ -33,20 +34,20 @@ class Token(BaseModel):
     token_type: str
  
 class TokenData(BaseModel):
-    email: str | None = None
+    email: Optional[str] = None
  
 class ProfilePicturedata(BaseModel):
-    base64: str | None = None
+    base64: Optional[str] = None
  
 class UserPartialSchema(BaseModel):
     email: str
     password: str
-    name: str | None = None 
+    name: Optional[str] = None
 
 class w3WalletSchema(BaseModel):
     wallet: str
     signature: str
-    message: str | None = None 
+    message: Optional[str] = None
 
 class UserLogin(BaseModel):
     email: str
@@ -54,9 +55,9 @@ class UserLogin(BaseModel):
 
 class UserLoggedIn(BaseModel):
     email: str 
-    name: str | None = None
-    team_name: str | None = None
-    is_active : bool | None = None
+    name: Optional[str] = None
+    team_name: Optional[str] = None
+    is_active : Optional[bool] = None
  
 class UserInDB(Users):
     password_hash: str
@@ -145,12 +146,12 @@ def authenticate_user(email: str, password: str):
         return False
     return user
  
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + datetime.timedelta(minutes=15)
+        expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

@@ -1,12 +1,13 @@
+from typing import Optional
 from pydantic import BaseModel
 from datalayer.database_manager import DatabaseManager
 
 
 class ProjectFeatureModel(BaseModel):
-    id : int | None = None 
-    project_id: int | None = None 
-    feature_id: int | None = None 
-    is_active: bool | None = None 
+    id : Optional[int] = None 
+    project_id: Optional[int] = None 
+    feature_id: Optional[int] = None 
+    is_active: Optional[bool] = None 
 
 class FeatureDict(BaseModel):
     values: dict[str, ProjectFeatureModel]

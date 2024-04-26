@@ -129,3 +129,5 @@ dmypy.json
 .pyre/
 app.yaml
 .app.yaml
+
+myenv/*
